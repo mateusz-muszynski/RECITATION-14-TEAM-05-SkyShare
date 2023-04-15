@@ -63,9 +63,16 @@ app.use(
 
 // TODO - Include your API routes here
 app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'});
-  });
+  res.json({ status: 'success', message: 'Welcome!' });
+});
 
+app.get("/register", (req, res) => {
+  res.render("pages/register");
+});
+
+app.get("/login", (req, res) => {
+  res.render("pages/login");
+});
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
