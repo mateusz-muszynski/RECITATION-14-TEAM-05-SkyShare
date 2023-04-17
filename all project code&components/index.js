@@ -73,6 +73,56 @@ app.get("/register", (req, res) => {
 app.get("/login", (req, res) => {
   res.render("pages/login");
 });
+
+
+// Register
+app.post('/register', async (req, res) => {
+
+  const username = req.body.username;
+  const hash = await bcrypt.hash(req.body.password, 10);
+
+  const insert_query = `INSERT INTO users (username, password) VALUES ($1, $2);`
+
+  db.none(insert_query, [username, hash])
+
+    .then(() => {
+      res.redirect("/login");
+    })
+    .catch(function (err) {
+      console.log(err);
+      res.redirect("/register");
+    })
+
+
+});
+
+
+// login
+app.post('/login', async (req, res) => {
+
+
+  const username = req.body.username;
+  const checkQuery = 'SELECT * FROM users WHERE username = $1';
+
+  db.one(checkQuery, username)
+    .then(async user => {
+      const match = await bcrypt.compare(req.body.password, user.password);
+      if (!match) {
+        res.render("pages/login", {
+          error: true,
+          message: 'Please enter again',
+        })
+      } else {
+        req.session.user = user;
+        req.session.save();
+        res.redirect("/discover");
+      }
+
+    }).catch((error) => {
+      console.log(error);
+      res.redirect("/register");
+    })
+});
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
