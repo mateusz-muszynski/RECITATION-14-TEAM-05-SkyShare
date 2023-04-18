@@ -1,0 +1,32 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+
+<main>
+    <div class="container">
+      <div class="col">
+        <%- include('../partials/message', locals) %>
+      </div>
+      
+      <form action="/friends" method="POST">
+        <label for="username">Enter Username:</label>
+        <input type="text" id="username" name="username">
+        <button type="submit">Follow User </button>
+      </form>
+    
+      <h2>You are currently following:</h2>
+      <% if (usernames.length > 0) { %>
+        <ul>
+          <% for (let i = 0; i < usernames.length; i++) { %>
+            <li><%= usernames[i] %></li>
+          <% } %>
+        </ul>
+      <% } else { %>
+        <p>You are not currently following anyone.</p>
+      <% } %>
+  
+    </div>
+  </main>
+
+  
+  <%- include ('../partials/footer') %>

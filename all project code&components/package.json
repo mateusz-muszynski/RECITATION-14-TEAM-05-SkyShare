@@ -18,11 +18,11 @@
       "mocha": "^6.2.2",
       "npm-run-all": "^4.1.5"
     },
-    "scripts": {
+    "scripts": { 
       "prestart": "npm install",
       "start": "node index.js",
       "dev": "nodemon server.js",
       "test": "mocha",
-      "testandrun": "npm run prestart && npm run test"
+      "testandrun": "npm run prestart && npm run test && npm start"
     }
   }
