@@ -66,6 +66,10 @@ app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
 
+app.get('/home', (req, res) => {
+    res.render('pages/home');
+  });
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
