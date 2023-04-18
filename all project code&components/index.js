@@ -66,6 +66,254 @@ app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
 
+  // TODO - Include your API routes here
+// "Let's add our first route"
+app.get('/', (req, res) => {
+  res.redirect('/login'); //this will call the /anotherRoute route in the API
+});
+
+
+//part a  ii. API Route for Register​
+app.get('/register', (req, res) => {
+  res.render('pages/register.ejs');   // Response: Render register.ejs page (???? should it b res.render('register.ejs');)
+});
+
+
+// "Now that we understand how async and await works, let's build the route."
+// Register
+app.post('/register', async (req, res) => {
+//hash the password using bcrypt library
+const hash = await bcrypt.hash(req.body.password, 10);
+
+// To-DO: Insert username and hashed password into 'users' table
+db.query('INSERT INTO users (username, password) VALUES ($1, $2)', [req.body.username, hash])
+  .then(() => {
+    // Redirect to GET /login route page after data has been inserted successfully
+    res.redirect('/login');
+  })
+  .catch((error) => {
+    // If the insert fails, redirect to GET /register route
+    res.redirect('/register');
+  });
+});
+
+
+
+// parta : ii. API route for Login              // EDIT THIS  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+app.get('/login', (req, res) => {
+res.render('pages/login');
+});
+
+
+
+
+app.post('/login', async (req, res) => {
+const username = req.body.username;
+const password = req.body.password;
+
+// Check if username or password is empty
+if (!username || !password) {
+  res.render('pages/login', { message: 'Please enter both username and password.' });
+  return;
+}
+
+try {
+  const user = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+
+  if (user.length === 0) {
+    res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
+   // res.redirect('/register');
+    return;
+  }
+  
+  const match = await bcrypt.compare(password, user[0].password);
+
+  if (!match) {
+    res.render('pages/login', { message: 'Incorrect  password.' });
+    return;
+  }
+
+  req.session.user = {
+    user_id: user[0].user_id,
+    username: user[0].username,
+    password: user[0].password
+  };
+  req.session.save();
+
+  console.log('SAVEDUSERID' + req.session.user.user_id);
+
+  res.redirect('/home');
+  
+} catch (err) {
+  console.log(err);
+  res.render('pages/login',{ message: 'database request fail' });
+}
+});
+
+
+
+
+
+// Authentication Middleware.
+const auth = (req, res, next) => {
+if (!req.session.user) {
+  // Default to login page.
+  return res.redirect('/login');
+}
+next();
+};
+
+
+
+// Authentication Required
+app.use(auth);
+
+
+
+
+
+
+// app.get('/discover', (req, res) => { comment
+//   res.render('pages/discover.ejs');
+// });
+
+// ii. API route for home
+app.get('/home', (req, res) => {
+
+res.render('pages/home.ejs');
+/*
+// console.log('!!!!! REQ:', req);
+axios({
+  url: `https://app.ticketmaster.com/discovery/v2/events.json`,
+// url: `https://app.ticketmaster.com/discovery/v2/events.json?apikey=XHb4O8bIHkk2Czh363uBw8XKdrg1L8Uv`,
+  method: 'GET',
+  dataType: 'json',
+  headers: {
+    'Accept-Encoding': 'application/json',
+  },
+  params: {
+    apikey: process.env.API_KEY,
+    keyword: 'Taylor Swift', //you can choose any artist/event here 
+    size: 10,
+  },
+})
+  .then(results => {
+    console.log(results.data._embedded.events); // the results will be displayed on the terminal if the docker containers are running // Send some parameters
+    res.render('pages/discover.ejs', {results: results.data._embedded.events});
+  })
+  .catch(error => {
+    console.log(error);
+    // Handle errors
+   res.render('pages/discover.ejs', { results: [], message: 'Error: could not fetch events.'});
+  }); */
+
+});
+
+
+
+// i. API route for Logout​   
+
+app.get("/logout", (req, res) => {
+req.session.destroy();
+res.render('pages/login', { message: 'Logged out Successfully' });
+});
+
+
+// added shit
+
+// API route: user inputs the username of person they want to follow 
+// user can follow themselves
+app.get('/friends', (req, res) => {
+const userId = req.session.user.user_id;
+const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+db.query(query, [userId])
+  .then(result => {
+    const usernames = result.map(row => row.username);
+    res.render('pages/friends', { usernames });
+  })
+  .catch(error => {
+    console.error(error);
+    res.status(500).send('Error retrieving followed usernames');
+  });
+});
+
+
+
+app.get('/friends', (req, res) => {
+res.render('pages/friends');
+}); 
+
+app.post('/friends', (req, res) => {
+const userId = req.session.user.user_id;
+const username = req.body.username;
+
+// Look up the user_id of the user being followed
+const query = 'SELECT user_id FROM users WHERE username = $1';
+db.query(query, [username])
+  .then(result => {
+    if (!result || result.length === 0 || result[0].user_id.length === 0) {
+      const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+      db.query(query, [userId])
+        .then(result => {
+          const usernames = result.map(row => row.username);
+          res.render('pages/friends', { message: "User not found", usernames });
+        })
+        .catch(error => {
+          console.error(error);
+          res.status(500).send('Error retrieving followed usernames');
+        });
+      return;
+    }
+
+    // Check if the user is already following the username
+    const followingId = result[0].user_id;
+    const selectQuery = 'SELECT * FROM followers WHERE user_id = $1 AND following_id = $2';
+    db.query(selectQuery, [userId, followingId])
+      .then(followers => {
+        if (followers.length > 0) {
+          const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+          db.query(query, [userId])
+            .then(result => {
+              const usernames = result.map(row => row.username);
+              res.render('pages/friends', { message: `You are already following user ${username}`, usernames });
+            })
+            .catch(error => {
+              console.error(error);
+              res.status(500).send('Error retrieving followed usernames');
+            });
+          return;
+        }
+
+        // Insert the new follower into the database
+        const insertQuery = 'INSERT INTO followers (user_id, following_id) VALUES ($1, $2)';
+        db.query(insertQuery, [userId, followingId])
+          .then(result => {
+            const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+            db.query(query, [userId])
+              .then(result => {
+                const usernames = result.map(row => row.username);
+                res.render('pages/friends', { message: `You are now following user ${username}`, usernames });
+              })
+              .catch(error => {
+                console.error(error);
+                res.status(500).send('Error retrieving followed usernames');
+              });
+          })
+          .catch(error => {
+            console.error(error);
+            res.status(500).send('Error inserting follower into database');
+          });
+      })
+      .catch(error => {
+        console.error(error);
+        res.status(500).send('Error looking up followers');
+      });
+  })
+  .catch(error => {
+    console.error(error);
+    res.status(500).send('Error looking up user');
+  });
+});
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
