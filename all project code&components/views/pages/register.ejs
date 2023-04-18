@@ -1,0 +1,39 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+<main>
+    <div class="container" style="width: 600px">
+        <div class="col"><%- include ('../partials/message') %></div>
+        <h1 style="margin-top: 100px;"><centre>Register</centre></h1>
+        <!-- THE REST OF YOUR HTML CODE GOES HERE -->
+        <br />
+        <form action="/register" method="POST">
+            <div class="row">
+                <div class="col-4">
+                    <label style="margin-top: 10px;" for="Username">Username</label>
+                </div>
+
+                <div class="col-8">
+                    <input class="form-control" type="text" id="username" name="username" placeholder="Please enter Username"/>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-4">
+                    <label for="Password">Password</label>
+                </div>
+
+                <div class="col-8">
+                    <input class="form-control" type="password" id="password" name="password" placeholder="Please enter Password"/>
+                </div>
+            </div>
+        <hr/>
+        <div class="d-flex justify-content-between" style = "display: flex; align-items: center;">
+            <p style = "margin-top: 10px;">Already have an account? <a href ="/login">Login</a></p>
+            <button type="submit" class="btn btn-primary" >Register</button>
+        </div>
+        </form>
+    </div>
+</main>
+
+<%- include ('../partials/footer') %>

@@ -1,0 +1,69 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+<main>
+  <div class="container">
+    <!-- THE REST OF YOUR HTML CODE GOES HERE -->
+    <div class="col"><%- include ('../partials/message') %></div>
+    
+    <main class="container mt-5">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+        <div class="d-flex">
+          <div class="card sm-6">
+            <div class="card-body text-center">
+              <img src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o=" alt="avatar"
+              class="rounded-circle img-fluid" style="width: 150px;">
+              <h5 class="my-3">Name</h5>
+              <p class="text-muted mb-1">Username</p>
+              <div class="d-flex justify-content-center mb-2">
+                <img src="https://www.travelandleisure.com/thmb/sH4T0ElWwZFyUhtqAZD3USeiaSc=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/james-webb-hole-WEBB0722-a7b14258290d4da9be4c7d50ee732d9b.jpg" alt="userImage1"  width="150" height ="150" class="rounded margin-left">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqlT4xMFW4OOW08S1QE-0NZ5KduMP-8FGEIlCsMZg_&s" alt="userImage2"  width="150"  height ="150" class="rounded margin-right">
+              </div>
+            </div>
+          </div>    
+          <div class="col-sm-7">
+            <h1 class="text-center">Sky Share</h1>
+            <div id="projectCarousel" class="carousel slide" data-bs-ride="carousel">
+              <div class="carousel-indicators">
+                <button type="button" data-bs-target="#projectCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Buff CUoin"></button>
+                <button type="button" data-bs-target="#projectCarousel" data-bs-slide-to="1" aria-label="Defeat the Metaverse"></button>
+                <button type="button" data-bs-target="#projectCarousel" data-bs-slide-to="2" aria-label="Project DI"></button>
+              </div>
+              <div class="carousel-inner">
+                <div class="carousel-item active">
+                  <img src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OXx8bmlnaHQlMjBza3l8ZW58MHx8MHx8&w=1000&q=80" class="d-block w-100" alt="Feed Image" height="500" width="300">
+                  <div style="background-color: rgba(0, 0, 0, 0.5);" class="carousel-caption d-none d-md-block">
+                    <h5>username of poster</h5>
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <img src="https://www.nasa.gov/sites/default/files/styles/full_width/public/thumbnails/image/stsci-h-p2042a-f-1663x1663.png?itok=Kztp10QG" class="d-block w-100" alt="Feed Image" height="500" width="300">
+                  <div style="background-color: rgba(0, 0, 0, 0.5);" class="carousel-caption d-none d-md-block">
+                    <h5>username of poster</h5>
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <img src="https://cdn.mos.cms.futurecdn.net/aWrBPkL4eDztCFFSayiJXk-1920-80.jpg.webp" class="d-block w-100" alt="Feed Image" height="500" width="300">
+                  <div style="background-color: rgba(0, 0, 0, 0.5);" class="carousel-caption d-none d-md-block">
+                    <h5>username of poster</h5>
+                  </div>
+                </div>
+                  <button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel" data-bs-slide="prev">
+                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Previous</span>
+                  </button>
+                  <button class="carousel-control-next" type="button" data-bs-target="#projectCarousel" data-bs-slide="next">
+                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                      <span class="visually-hidden">Next</span>
+                  </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+
+  </div>
+</main>
+
+<%- include ('../partials/footer') %>
