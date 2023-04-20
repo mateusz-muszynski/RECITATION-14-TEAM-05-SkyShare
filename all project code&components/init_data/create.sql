@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS followers (
 );
 
 
-DROP TABLE IF EXISTS photos CASCADE; 
+DROP TABLE IF EXISTS photos CASCADE;  
 CREATE TABLE IF NOT EXISTS photos (
   photo_id SERIAL PRIMARY KEY NOT NULL,
   user_id INT NOT NULL,
@@ -24,4 +24,4 @@ CREATE TABLE IF NOT EXISTS photos (
   location VARCHAR(255),
   image_url VARCHAR(300) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+); /* hello */
