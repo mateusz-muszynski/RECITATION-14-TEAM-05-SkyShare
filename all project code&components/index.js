@@ -237,15 +237,6 @@ db.query(query, [userId])
   });
 });
 
-app.get('/nasa', (req, res) => {
-  res.render('pages/nasa');  
-});
-
-app.post('/nasa', (req,res) => {
-  const userId = req.session.user.user_id;
-  const username = req.body.username;
-})
-
 app.get('/friends', (req, res) => {
 res.render('pages/friends');
 }); 
@@ -321,6 +312,12 @@ db.query(query, [username])
     res.status(500).send('Error looking up user');
   });
 });
+
+app.get('/nasa', (req, res) => {
+res.render('pages/nasa');
+});
+
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
