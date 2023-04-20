@@ -82,6 +82,13 @@ app.get('/register', (req, res) => {
 // "Now that we understand how async and await works, let's build the route."
 // Register
 app.post('/register', async (req, res) => {
+
+  if (!req.body.username || !req.body.password) {
+    // Redirect to GET /register route page with error message
+    res.json({status: 'notsuccess', message: 'invalidregister'});
+    return;
+  }
+
 //hash the password using bcrypt library
 const hash = await bcrypt.hash(req.body.password, 10);
 
@@ -89,11 +96,13 @@ const hash = await bcrypt.hash(req.body.password, 10);
 db.query('INSERT INTO users (username, password) VALUES ($1, $2)', [req.body.username, hash])
   .then(() => {
     // Redirect to GET /login route page after data has been inserted successfully
-    res.redirect('/login');
+    res.json({status: 'success', message: 'validregister'});
+    //res.redirect('/login');
   })
   .catch((error) => {
     // If the insert fails, redirect to GET /register route
-    res.redirect('/register');
+    res.json({status: 'notsuccess', message: 'invalidregister'});
+   // res.redirect('/register');
   });
 });
 
@@ -109,11 +118,12 @@ res.render('pages/login');
 
 app.post('/login', async (req, res) => {
 const username = req.body.username;
-const password = req.body.password;
+const password = req.body.password; // heyy
 
 // Check if username or password is empty
 if (!username || !password) {
-  res.render('pages/login', { message: 'Please enter both username and password.' });
+  res.json({status: 'notsuccess', message: 'invalidlogin'});
+  //res.render('pages/login', { message: 'Please enter both username and password.' });
   return;
 }
 
@@ -121,7 +131,8 @@ try {
   const user = await db.query('SELECT * FROM users WHERE username = $1', [username]);
 
   if (user.length === 0) {
-    res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
+    res.json({status: 'notsuccess', message: 'invalidlogin'});
+   // res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
    // res.redirect('/register');
     return;
   }
@@ -129,7 +140,8 @@ try {
   const match = await bcrypt.compare(password, user[0].password);
 
   if (!match) {
-    res.render('pages/login', { message: 'Incorrect  password.' });
+    res.json({status: 'notsuccess', message: 'invalidlogin'});
+   // res.render('pages/login', { message: 'Incorrect  password.' });
     return;
   }
 
@@ -140,13 +152,15 @@ try {
   };
   req.session.save();
 
-  console.log('SAVEDUSERID' + req.session.user.user_id);
+  //console.log('SAVEDUSERID' + req.session.user.user_id);
 
-  res.redirect('/home');
+ // res.redirect('/home');
+ res.json({status: 'success', message: 'validlogin'});
   
 } catch (err) {
   console.log(err);
-  res.render('pages/login',{ message: 'database request fail' });
+  res.json({status: 'notsuccess', message: 'invalidlogin'});
+ // res.render('pages/login',{ message: 'database request fail' });
 }
 });
 
@@ -320,6 +334,9 @@ db.query(query, [username])
 // starting the server and keeping the connection open to listen for more requests
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
+
+
+
 
 
 
