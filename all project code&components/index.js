@@ -343,188 +343,50 @@ app.get('/uploadPhoto', (req, res) => {
 }); */
 
 
-app.get('/upload', (req, res) => {
-  res.render('pages/upload');
-  }); 
-/* this one was originally commented
-app.get('/uploadPhoto', (req, res) => {
-  //res.render('pages/uploadPhoto.ejs');
+app.get('/upload', (req, res) => { // most recent get upload!!!!!!!!!
 
-  // db query select photo_id from photos to users where userid = req.session.userid or whatever
-
-  // db query from photos table to get url 
-  //once u get the url, in ejs page do <img url = >
-  db.query('select photo_id from photos where user_id = $1', [req.session.user.user_id])
-  .then(() => {
-      // db query from photos table to get url 
-        db.query('select photo_url from photos where photo_id = $1', [result])
-      .then(() => {
-        //  incomplete code, I want to send this url to the uploadPhotos ejs 
-      })
-      .catch((error) => {
-        res.render('pages/uploadPhotos', { message: "error" });
-      });
-  })
-  .catch((error) => {
-    res.render('pages/uploadPhoto', { message: "error lol " });
-  });
-}); */
-
-
-
-/*
-app.post('/uploadPhoto', async (req, res) => {
-  const file = req.files.photo;
-  try {
-    const cloudinaryRes = await cloudinary.uploader.upload(file.tempFilePath, {public_id: "userimg"
+    db.any('SELECT photo_url FROM photos WHERE user_id = $1', [req.session.user.user_id])
+    .then((result) => {
+      console.log("result::" + result);
+      const photoUrls = result;
+    /*  if (result.rows.length > 0) {
+       // photoUrls = result.rows.map(row => row.photo_url);
+       //photoUrls.push(result.row.photo_url)
+      } */
+      console.log("FGHJKHJGJHJ:" ,photoUrls)
+      res.render('pages/upload', { message: 'success', photoUrls: photoUrls });
+    })
+    .catch((error) => {
+      res.render('pages/upload', { message: 'erorr couldnt display photo', photoUrls: [] });
     });
-
-    const url = cloudinary.url("userImage", {
-      width: 100,
-      height: 150,
-      Crop: 'fill'
-    });
-
-    await db.query('INSERT INTO photos (photo_url) VALUES ($1)', [cloudinaryRes.secure_url]);
-    
-    res.render('pages/uploadPhotos', { message: 'success' });
-  } catch (error) {
-    console.log(error);
-    res.render('pages/uploadPhotos', { message: 'not success' });
-  }
-});  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
-  }
-});
-const upload = multer({ storage: storage });
-
-// this one was originally commented.. TA ash
-app.post('/uploadPhoto', async (req, res) => {
-  //const file = req.files.photo
-console.log("something")
-const {image} = req.files;
-console.log(image);
-
-  res = cloudinary.uploader.upload(req.files.photo, {public_id: "userimg"})
-  res.then((data) => {
-    console.log(data);
-    console.log(data.secure_url);
-  }).catch((err) => {
-    console.log(err);
-  });
+}); 
   
   
-  // Generate 
-  const url = cloudinary.url("userImage", {
-    width: 100,
-    height: 150,
-    Crop: 'fill'
-  });
-  
-  
-  
-  // The output url
-  console.log(url);
-
-
+app.post("/upload", uploader.single("recfile"), async (req, res) => { // this actually works omg
+    console.log("HELLOOO")
+    const upload = await cloudinary.v2.uploader.upload(req.file.path);
 
   //write db query to insert in table
 
-db.query('INSERT INTO photos (photo_url) VALUES ($1)', [url])
-.then(() => {
-  // Redirect to GET /login route page after data has been inserted successfully
-  res.render('pages/uploadPhotos',{ message: 'success' });
-})
-.catch((error) => {
-  // If the insert fails, redirect to GET /register route
-  res.render('pages/uploadPhotos',{ message: 'not success' });
-});
-
-}); 
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-app.post("/upload", uploader.single("recfile"), async (req, res) => {
-  console.log("HELLOOO")
-  const upload = await cloudinary.v2.uploader.upload(req.file.path);
-
-  
-//write db query to insert in table
-
-
-// first, get the user id of the person posting the photo
-const userId = req.session.user.user_id;
-db.query('select * from users where user_id = $1', [userId])
-.then(() => {
-    // once u successfully get userid, insert the data into photos table
-    db.query('INSERT INTO photos (photo_url,user_id) VALUES ($1, $2)', [upload.secure_url, userId])
-    .then(() => {
-      // Redirect to GET /login route page after data has been inserted successfully
-      res.render('pages/upload',{ message: 'success' });
-      
-    })
-    .catch((error) => {
-      // If the insert fails, redirect to GET /register route
-      res.render('pages/upload',{ message: 'not success' });
-    });
-
-})
-.catch((error) => {
-  // If it failed
-  res.render('pages/upload',{ message: 'no user ' });
-});
-
-
-
-
-/*
-  db.query('INSERT INTO photos (photo_url) VALUES ($1)', [upload.secure_url])
+  // first, get the user id of the person posting the photo
+  const userId = req.session.user.user_id;
+  db.query('select * from users where user_id = $1', [userId])
   .then(() => {
-    // Redirect to GET /login route page after data has been inserted successfully
-    res.render('pages/upload',{ message: 'success' });
+      // once u successfully get userid, insert the data into photos table
+      db.query('INSERT INTO photos (photo_url,user_id) VALUES ($1, $2)', [upload.secure_url, userId])
+      .then(() => {
+        // res.render('pages/upload',{ message: 'success', photoUrls: []});
+        res.redirect('/upload');
+      })
+      .catch((error) => {
+        // If the insert fails, redirect to GET /register route
+        res.render('pages/upload',{ message: 'not success', photoUrls: []});
+      });
   })
   .catch((error) => {
-    // If the insert fails, redirect to GET /register route
-    res.render('pages/upload',{ message: 'not success' });
-  }); */
-
-
- /* return res.json({
-    success: true,
-    file: upload.secure_url,
+    // If it failed
+    res.render('pages/upload',{ message: 'no user ' });
   });
-   */
 });
 // *****************************************************
 // <!-- Section 5 : Start Server-->
