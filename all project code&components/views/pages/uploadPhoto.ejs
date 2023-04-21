@@ -1,0 +1,29 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+
+<main>
+    <div class="container">
+      <div class="col">
+        <%- include('../partials/message', locals) %>
+      </div>
+      <h2>text</h2>
+
+
+      <form action="/upload" method="POST" enctype="multipart/form-data">
+        <h3>Upload Photo</h3>
+        <input type="file" name="recfile">
+        <br>
+        <input type="submit" value="Upload">
+ 
+      </form>
+
+      <% photoUrls.forEach((url) => { %>
+        <img src="<%= url %>" alt="User uploaded photo">
+      <% }); %>
+  
+    </div>
+  </main>
+
+  
+  <%- include ('../partials/footer') %>
