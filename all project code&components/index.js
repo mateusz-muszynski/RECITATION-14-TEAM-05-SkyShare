@@ -18,17 +18,6 @@ const uploader = require("./multer");
 
 
 
-app.post("/upload", uploader.single("recfile"), async (req, res) => {
-  console.log("HELLOOO")
-  const upload = await cloudinary.v2.uploader.upload(req.file.path);
-  return res.json({
-    success: true,
-    file: upload.secure_url,
-  });
-  
-});
-
-
 
 // const multer = require('multer'); //cgpt
 // *****************************************************
@@ -337,6 +326,8 @@ db.query(query, [username])
 }); */
 
 
+
+/* this is the most recent
 app.get('/uploadPhoto', (req, res) => {
   db.query('SELECT photo_url FROM photos WHERE user_id = $1', [req.session.user.user_id])
   .then((result) => {
@@ -349,8 +340,12 @@ app.get('/uploadPhoto', (req, res) => {
   .catch((error) => {
     res.render('pages/uploadPhoto', { message: 'erorr couldnt display photo', photoUrls: [] });
   });
-}); 
+}); */
 
+
+app.get('/upload', (req, res) => {
+  res.render('pages/upload');
+  }); 
 /* this one was originally commented
 app.get('/uploadPhoto', (req, res) => {
   //res.render('pages/uploadPhoto.ejs');
@@ -468,6 +463,69 @@ db.query('INSERT INTO photos (photo_url) VALUES ($1)', [url])
 }); 
  */
 
+
+
+
+
+
+
+
+
+
+
+
+
+app.post("/upload", uploader.single("recfile"), async (req, res) => {
+  console.log("HELLOOO")
+  const upload = await cloudinary.v2.uploader.upload(req.file.path);
+
+  
+//write db query to insert in table
+
+
+// first, get the user id of the person posting the photo
+const userId = req.session.user.user_id;
+db.query('select * from users where user_id = $1', [userId])
+.then(() => {
+    // once u successfully get userid, insert the data into photos table
+    db.query('INSERT INTO photos (photo_url,user_id) VALUES ($1, $2)', [upload.secure_url, userId])
+    .then(() => {
+      // Redirect to GET /login route page after data has been inserted successfully
+      res.render('pages/upload',{ message: 'success' });
+      
+    })
+    .catch((error) => {
+      // If the insert fails, redirect to GET /register route
+      res.render('pages/upload',{ message: 'not success' });
+    });
+
+})
+.catch((error) => {
+  // If it failed
+  res.render('pages/upload',{ message: 'no user ' });
+});
+
+
+
+
+/*
+  db.query('INSERT INTO photos (photo_url) VALUES ($1)', [upload.secure_url])
+  .then(() => {
+    // Redirect to GET /login route page after data has been inserted successfully
+    res.render('pages/upload',{ message: 'success' });
+  })
+  .catch((error) => {
+    // If the insert fails, redirect to GET /register route
+    res.render('pages/upload',{ message: 'not success' });
+  }); */
+
+
+ /* return res.json({
+    success: true,
+    file: upload.secure_url,
+  });
+   */
+});
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
