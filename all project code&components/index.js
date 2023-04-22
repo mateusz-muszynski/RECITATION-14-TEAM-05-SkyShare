@@ -1,5 +1,5 @@
 // *****************************************************
-// <!-- Section 1 : Import Dependencies -->
+// <!-- Section 1 : Import Dependencies --> 
 // *****************************************************
 
 const express = require('express'); // To build an application server or API
@@ -68,7 +68,7 @@ app.use(
 
 // TODO - Include your API routes here
 app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'});
+    res.json({status: 'success', message: 'Welcome!'}); // this api was just added as a sample positive test case thing for lab 11
   });
 
 // "Let's add our first route"
@@ -91,7 +91,7 @@ app.post('/register', async (req, res) => {
     res.render('pages/register', { message: 'Username and password are required.' });
     return;
   }
-  // we dont check if user tries registering with an already existing username lol
+  // we dont check if user tries registering with an already existing username lol...
   //hash the password using bcrypt library
   const hash = await bcrypt.hash(req.body.password, 10);
 
@@ -140,6 +140,7 @@ app.post('/login', async (req, res) => {
       return;
     }
 
+    // save the session! so the user currently logged in's info is retained throughout
     req.session.user = {
       user_id: user[0].user_id,
       username: user[0].username,
@@ -185,8 +186,16 @@ res.render('pages/login', { message: 'Logged out Successfully' });
 
 
 
-// API route: user inputs the username of person they want to follow 
+
+
+
+
+// *************************************************************************     THE `FOLLOWING` PAGE !!!!!!!!!!!
+// user can input other usernames to follow.
+//a list of usernames that they currently follow + photos those usernames uploaded are all displayed
 // important: a user can choose to follow themselves! 
+
+// API route: user inputs the username of person they want to follow 
 app.get('/friends', (req, res) => {
   console.log("jennifer")
   const userId = req.session.user.user_id;
@@ -214,13 +223,163 @@ app.get('/friends', (req, res) => {
 });
 
 
+// API route that gets the user inputted photo file and converts it to url using cloudinary and then inserts that photo_url generated into the photos table
+app.post('/friends', (req, res) => {
+  const userId = req.session.user.user_id;
+  const username = req.body.username;
+
+  // Look up the user_id of the user being followed
+  const query = 'SELECT user_id FROM users WHERE username = $1';
+  db.query(query, [username])
+    .then(result => {
+      if (!result || result.length === 0 || result[0].user_id.length === 0) {
+        const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+        db.query(query, [userId])
+          .then(result => {
+            const usernames = result.map(row => row.username);
+             res.redirect('/friends') // user tries following a username that dne in database
+          })
+          .catch(error => {
+            console.error(error);
+            res.status(500).send('Error retrieving followed usernames');
+          });
+        return;
+      }
+
+      // Check if the user is already following the username
+      const followingId = result[0].user_id;
+      const selectQuery = 'SELECT * FROM followers WHERE user_id = $1 AND following_id = $2';
+      db.query(selectQuery, [userId, followingId])
+        .then(followers => {
+          if (followers.length > 0) {
+            const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+            db.query(query, [userId])
+              .then(result => {
+                const usernames = result.map(row => row.username);
+                res.redirect('/friends'); // ur already following them
+              })
+              .catch(error => {
+                console.error(error);
+                res.status(500).send('Error retrieving followed usernames');
+              });
+            return;
+          }
+
+          // Insert the new follower into the database
+          const insertQuery = 'INSERT INTO followers (user_id, following_id) VALUES ($1, $2)';
+          db.query(insertQuery, [userId, followingId])
+            .then(result => {
+              const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+              db.query(query, [userId])
+                .then(followedUsers => {
+                  const usernames = followedUsers.map(row => row.username);
+                 res.redirect('/friends'); // success.. ur now following them
+                })
+                .catch(error => {
+                  console.error(error);
+                  res.status(500).send('Error retrieving followed usernames');
+                });
+            })
+            .catch(error => {
+              console.error(error);
+              res.status(500).send('Error inserting follower into database');
+            });
+        })
+        .catch(error => {
+          console.error(error);
+          res.status(500).send('Error checking if user is already following');
+        });
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).send('Error looking up user by username');
+    });
+});
+
+
+
+
+
+
+// *************************************************************************     THE `MY PHOTOS` PAGE !!!!!!!!!!!
+// user can upload their own photos and the location (US State) they took the photo
+// this page also displays all the photos the user uploaded
+
+
+/* API route for uploadphoto. this gets the photo_url(s) associated w the user in session, and then in the ejs, it uses forEach to display them all */
+app.get('/upload', (req, res) => { 
+  //db.any('SELECT photo_url FROM photos WHERE user_id = $1', [req.session.user.user_id]) // this is if we just get the photourl and not the location
+  db.any('SELECT photo_url, photo_state FROM photos WHERE user_id = $1', [req.session.user.user_id]) // get photo_state as well so we can display it on page
+    .then((result) => {
+      console.log("result::" + result);
+      //const photoUrls = result;  // this is if we just get the photourl and not the location
+      const photoUrls = result.map(row => ({ photo_url: row.photo_url, photo_state: row.photo_state })); // getting photo_state as well
+
+      console.log("FGHJKHJGJHJ:" ,photoUrls)
+      res.render('pages/upload', { photoUrls: photoUrls });
+    })
+    .catch((error) => {
+      res.render('pages/upload', { message: 'erorr couldnt display photo', photoUrls: [] });
+    });
+}); 
+  
+
+//API route 
+// given user input of a photo file, this generates a url for that file and stores it in the photos table
+app.post("/upload", uploader.single("recfile"), async (req, res) => { // bro this actually works omg??!!?!?!???!?!?
+  console.log("HELLOOO")
+  const upload = await cloudinary.v2.uploader.upload(req.file.path);
+
+  // write db query to insert in table!
+  // first, get the user id of the person posting the photo
+  const userId = req.session.user.user_id;
+  const state = req.body.state; // Retrieve the selected state from the request body
+  db.query('select * from users where user_id = $1', [userId])
+  .then(() => {
+      // once u successfully get userid, insert the data into photos table
+      db.query('INSERT INTO photos (photo_url, photo_state, user_id) VALUES ($1, $2, $3)', [upload.secure_url, state, userId]) // insert location into the photos table
+      .then(() => {
+        // res.render('pages/upload',{ message: 'success', photoUrls: []});
+        res.redirect('/upload');
+      })
+      .catch((error) => {
+        // If the insert fails, redirect to GET /register route
+        res.render('pages/upload',{ message: 'not success', photoUrls: []});
+      });
+  })
+  .catch((error) => {
+    // If it failed
+    res.render('pages/upload',{ message: 'no user ' });
+  });
+});
+
+
+
+// *****************************************************
+// <!-- Section 5 : Start Server-->
+// *****************************************************
+// starting the server and keeping the connection open to listen for more requests
+module.exports = app.listen(3000);
+console.log('Server is listening on port 3000');
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 app.get('/friends', (req, res) => {
   res.render('pages/friends');
 }); 
  */
-
+/* 
 app.post('/friends', (req, res) => {
   const userId = req.session.user.user_id;
   const username = req.body.username;
@@ -292,151 +451,23 @@ app.post('/friends', (req, res) => {
       res.status(500).send('Error looking up user by username');
     });
 });
-
-
-
-
-
-/* post route that just would display usernames user is followinf..
-app.post('/friends', (req, res) => {
-  const userId = req.session.user.user_id;
-  const username = req.body.username;
-
-// Look up the user_id of the user being followed
-const query = 'SELECT user_id FROM users WHERE username = $1';
-db.query(query, [username])
-  .then(result => {
-    if (!result || result.length === 0 || result[0].user_id.length === 0) {
-      const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
-      db.query(query, [userId])
-        .then(result => {
-          const usernames = result.map(row => row.username);
-          res.render('pages/friends', { message: "User not found", usernames });
-        })
-        .catch(error => {
-          console.error(error);
-          res.status(500).send('Error retrieving followed usernames');
-        });
-      return;
-    }
-
-    // Check if the user is already following the username
-    const followingId = result[0].user_id;
-    const selectQuery = 'SELECT * FROM followers WHERE user_id = $1 AND following_id = $2';
-    db.query(selectQuery, [userId, followingId])
-      .then(followers => {
-        if (followers.length > 0) {
-          const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
-          db.query(query, [userId])
-            .then(result => {
-              const usernames = result.map(row => row.username);
-              res.render('pages/friends', { message: `You are already following user ${username}`, usernames });
-            })
-            .catch(error => {
-              console.error(error);
-              res.status(500).send('Error retrieving followed usernames');
-            });
-          return;
-        }
-
-        // Insert the new follower into the database
-        const insertQuery = 'INSERT INTO followers (user_id, following_id) VALUES ($1, $2)';
-        db.query(insertQuery, [userId, followingId])
-          .then(result => {
-            const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
-            db.query(query, [userId])
-              .then(result => {
-                const usernames = result.map(row => row.username);
-                res.render('pages/friends', { message: `You are now following user ${username}`, usernames });
-              })
-              .catch(error => {
-                console.error(error);
-                res.status(500).send('Error retrieving followed usernames');
-              });
-          })
-          .catch(error => {
-            console.error(error);
-            res.status(500).send('Error inserting follower into database');
-          });
-      })
-      .catch(error => {
-        console.error(error);
-        res.status(500).send('Error looking up followers');
-      });
-  })
-  .catch(error => {
-    console.error(error);
-    res.status(500).send('Error looking up user');
-  });
-});
-
-
-
 */
 
-
-
-
-
-
-/* API route for uploadphoto. this gets the photo_url(s) associated w the user in session, and then in the ejs, it uses forEach to display them all */
-app.get('/upload', (req, res) => { 
-  //db.any('SELECT photo_url FROM photos WHERE user_id = $1', [req.session.user.user_id])
-  db.any('SELECT photo_url, photo_state FROM photos WHERE user_id = $1', [req.session.user.user_id]) // get photo_state as well so we can display it on page
-    .then((result) => {
-      console.log("result::" + result);
-      //const photoUrls = result;
-      const photoUrls = result.map(row => ({ photo_url: row.photo_url, photo_state: row.photo_state })); // getting photo_state as well
-    /*  if (result.rows.length > 0) {
-       // photoUrls = result.rows.map(row => row.photo_url);
-       //photoUrls.push(result.row.photo_url)
-      } */
-      console.log("FGHJKHJGJHJ:" ,photoUrls)
-      res.render('pages/upload', { photoUrls: photoUrls });
-    })
-    .catch((error) => {
-      res.render('pages/upload', { message: 'erorr couldnt display photo', photoUrls: [] });
-    });
-}); 
-  
-
-// given user input of a photo file, this generates a url for that file and stores it in the photos table
-app.post("/upload", uploader.single("recfile"), async (req, res) => { // bro this actually works omg??!!?!?!???!?!?
-    console.log("HELLOOO")
-    const upload = await cloudinary.v2.uploader.upload(req.file.path);
-
-  //write db query to insert in table
-
-  // first, get the user id of the person posting the photo
-  const userId = req.session.user.user_id;
-  const state = req.body.state; // Retrieve the selected state from the request body
-  db.query('select * from users where user_id = $1', [userId])
-  .then(() => {
-      // once u successfully get userid, insert the data into photos table
-      db.query('INSERT INTO photos (photo_url, photo_state, user_id) VALUES ($1, $2, $3)', [upload.secure_url, state, userId]) // insert location into the photos table
-      .then(() => {
-        // res.render('pages/upload',{ message: 'success', photoUrls: []});
-        res.redirect('/upload');
-      })
-      .catch((error) => {
-        // If the insert fails, redirect to GET /register route
-        res.render('pages/upload',{ message: 'not success', photoUrls: []});
-      });
-  })
-  .catch((error) => {
-    // If it failed
-    res.render('pages/upload',{ message: 'no user ' });
-  });
+/*
+// REDIRECT_MESSAGE1 (user tries following a username that dne in database)
+app.get('/friends1', (req, res) => {
+  const message = req.query.message;
+  const usernames = req.query.usernames;
+  res.render('pages/friends', { message, usernames });
 });
-
-
-
-// *****************************************************
-// <!-- Section 5 : Start Server-->
-// *****************************************************
-// starting the server and keeping the connection open to listen for more requests
-module.exports = app.listen(3000);
-console.log('Server is listening on port 3000');
-
-
-
+// REDIRECT_MESSAGE2   (user tries following a username theyre already following)
+app.get('/friends2', (req, res) => {
+  const { message, usernames } = req.query;
+  const parsedUsernames = JSON.parse(usernames);
+  res.render('pages/friends', { message, followedUsers: [], usernames: parsedUsernames });
+});
+//REDIRECT_MESSAGE3 (success! user is now following <username>)
+app.get('/friends3', (req, res) => {
+  const { message, followedUsers, usernames } = req.query;
+  res.render('pages/friends', { message: message ? decodeURIComponent(message) : '', followedUsers: followedUsers ? JSON.parse(decodeURIComponent(followedUsers)) : [], usernames: usernames ? JSON.parse(decodeURIComponent(usernames)) : [] });
+}); */
