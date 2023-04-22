@@ -1,0 +1,40 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+
+<main>
+    <div class="container">
+      <div class="col">
+        <%- include('../partials/message', locals) %>
+      </div>
+
+
+      <form action="/upload" method="POST" enctype="multipart/form-data">
+        <h3>Upload Photo</h3>
+        <input type="file" name="recfile" accept="image/*" required>
+        <br>
+        <input type="submit" value="Upload">
+ 
+      </form>
+
+
+      <% if (photoUrls.length > 0) { %>
+        <h4>Your current images!</h4>
+        <% photoUrls.forEach((url) => { %>
+          <img src="<%= url.photo_url %>" alt="User uploaded photo">
+        <% }); %>
+      <% } else { %>
+        <p>You have no photos uploaded yet!</p>
+      <% } %>
+    
+  
+    </div>
+  </main>
+  <style>
+    img {
+      max-width: 300px;
+      max-height: 300px;
+    }
+  </style>
+  
+  <%- include ('../partials/footer') %>

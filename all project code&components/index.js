@@ -11,15 +11,10 @@ const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part B.
 
 
-// these are used for the uploading image stuff 
+// these are used for the uploading image stuff!!!!!!!
 const cloudinary = require("./cloudinary");
 const uploader = require("./multer");
 
-
-
-
-
-// const multer = require('multer'); //cgpt
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -76,90 +71,91 @@ app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
   });
 
-  // TODO - Include your API routes here
 // "Let's add our first route"
 app.get('/', (req, res) => {
   res.redirect('/login'); //this will call the /anotherRoute route in the API
 });
 
 
-//part a  ii. API Route for Register​
+// API Route for Register​
 app.get('/register', (req, res) => {
-  res.render('pages/register.ejs');   // Response: Render register.ejs page (???? should it b res.render('register.ejs');)
+  res.render('pages/register.ejs');   
 });
 
 
 // "Now that we understand how async and await works, let's build the route."
 // Register
 app.post('/register', async (req, res) => {
-//hash the password using bcrypt library
-const hash = await bcrypt.hash(req.body.password, 10);
+  // Check if username or password is empty
+  if (!req.body.username || !req.body.password) {
+    res.render('pages/register', { message: 'Username and password are required.' });
+    return;
+  }
+  // we dont check if user tries registering with an already existing username lol
+  //hash the password using bcrypt library
+  const hash = await bcrypt.hash(req.body.password, 10);
 
-// To-DO: Insert username and hashed password into 'users' table
-db.query('INSERT INTO users (username, password) VALUES ($1, $2)', [req.body.username, hash])
-  .then(() => {
-    // Redirect to GET /login route page after data has been inserted successfully
-    res.redirect('/login');
-  })
-  .catch((error) => {
-    // If the insert fails, redirect to GET /register route
-    res.redirect('/register');
-  });
+  // To-DO: Insert username and hashed password into 'users' table
+  db.query('INSERT INTO users (username, password) VALUES ($1, $2)', [req.body.username, hash])
+    .then(() => {
+      // Redirect to GET /login route page after data has been inserted successfully
+      res.redirect('/login');
+    })
+    .catch((error) => {
+      // If the insert fails, redirect to GET /register route
+      res.redirect('/register');
+    });
 });
 
 
 
-// parta : ii. API route for Login              
+// API route for Login              
 app.get('/login', (req, res) => {
-res.render('pages/login');
+  res.render('pages/login');
 });
 
 app.post('/login', async (req, res) => {
-const username = req.body.username;
-const password = req.body.password;
+  const username = req.body.username;
+  const password = req.body.password;
 
-// Check if username or password is empty
-if (!username || !password) {
-  res.render('pages/login', { message: 'Please enter both username and password.' });
-  return;
-}
-
-try {
-  const user = await db.query('SELECT * FROM users WHERE username = $1', [username]);
-
-  if (user.length === 0) {
-    res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
-   // res.redirect('/register');
-    return;
-  }
-  
-  const match = await bcrypt.compare(password, user[0].password);
-
-  if (!match) {
-    res.render('pages/login', { message: 'Incorrect  password.' });
+  // Check if username or password is empty
+  if (!username || !password) {
+    res.render('pages/login', { message: 'Please enter both username and password.' });
     return;
   }
 
-  req.session.user = {
-    user_id: user[0].user_id,
-    username: user[0].username,
-    password: user[0].password
-  };
-  req.session.save();
+  try {
+    const user = await db.query('SELECT * FROM users WHERE username = $1', [username]);
 
-  console.log('SAVEDUSERID' + req.session.user.user_id);
+    if (user.length === 0) {
+      res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
+    // res.redirect('/register');
+      return;
+    }
+    
+    const match = await bcrypt.compare(password, user[0].password);
 
-  res.redirect('/home');
-  
-} catch (err) {
-  console.log(err);
-  res.render('pages/login',{ message: 'database request fail' });
-}
+    if (!match) {
+      res.render('pages/login', { message: 'Incorrect  password.' });
+      return;
+    }
+
+    req.session.user = {
+      user_id: user[0].user_id,
+      username: user[0].username,
+      password: user[0].password
+    };
+    req.session.save();
+
+    console.log('SAVEDUSERID' + req.session.user.user_id);
+
+    res.redirect('/home');
+    
+  } catch (err) {
+    console.log(err);
+    res.render('pages/login',{ message: 'database request fail' });
+  }
 });
-
-
-
-
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
@@ -170,39 +166,27 @@ if (!req.session.user) {
 next();
 };
 
-
-
 // Authentication Required
 app.use(auth);
 
-
-
-
-
-
-// app.get('/discover', (req, res) => { comment
-//   res.render('pages/discover.ejs');
-// });
 
 // ii. API route for home
 app.get('/home', (req, res) => {
   res.render('pages/home.ejs');
 });
 
-
-
 // i. API route for Logout​   
-
 app.get("/logout", (req, res) => {
 req.session.destroy();
 res.render('pages/login', { message: 'Logged out Successfully' });
 });
 
 
-// added shit
+
+
 
 // API route: user inputs the username of person they want to follow 
-// user can follow themselves
+// user can follow themselves!
 app.get('/friends', (req, res) => {
 const userId = req.session.user.user_id;
 const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
@@ -218,14 +202,13 @@ db.query(query, [userId])
 });
 
 
-
 app.get('/friends', (req, res) => {
-res.render('pages/friends');
+  res.render('pages/friends');
 }); 
 
 app.post('/friends', (req, res) => {
-const userId = req.session.user.user_id;
-const username = req.body.username;
+  const userId = req.session.user.user_id;
+  const username = req.body.username;
 
 // Look up the user_id of the user being followed
 const query = 'SELECT user_id FROM users WHERE username = $1';
@@ -305,46 +288,7 @@ db.query(query, [username])
 
 
 // ii. API route for uploadphoto
-
-/*app.get('/uploadPhoto', async (req, res) => { hthis was originally commented 
-  try {
-    const photosToUsers = await db.query('SELECT photo_id FROM photos_to_users WHERE user_id = $1', [req.session.user.user_id]);
-    if (photosToUsers.length === 0) {
-      return res.render('pages/uploadPhotos', { message: 'No photos found' });
-    }
-    const photoId = photosToUsers[0].photo_id;
-    const photos = await db.query('SELECT photo_url FROM photos WHERE photo_id = $1', [photoId]);
-    if (photos.length === 0) {
-      return res.render('pages/uploadPhotos', { message: 'No photo found' });
-    }
-    const photoUrl = photos[0].photo_url;
-    res.render('pages/uploadPhotos', { photoUrl });
-  } catch (error) {
-    console.log(error);
-    res.render('pages/uploadPhotos', { message: 'Failed to get photo URL' });
-  }
-}); */
-
-
-
-/* this is the most recent
-app.get('/uploadPhoto', (req, res) => {
-  db.query('SELECT photo_url FROM photos WHERE user_id = $1', [req.session.user.user_id])
-  .then((result) => {
-    let photoUrls = [];
-    if (result.rows.length > 0) {
-      photoUrls = result.rows.map(row => row.photo_url);
-    }
-    res.render('pages/uploadPhoto', { message: 'success', photoUrls: photoUrls });
-  })
-  .catch((error) => {
-    res.render('pages/uploadPhoto', { message: 'erorr couldnt display photo', photoUrls: [] });
-  });
-}); */
-
-
-app.get('/upload', (req, res) => { // most recent get upload!!!!!!!!!
-
+app.get('/upload', (req, res) => { 
     db.any('SELECT photo_url FROM photos WHERE user_id = $1', [req.session.user.user_id])
     .then((result) => {
       console.log("result::" + result);
@@ -354,7 +298,7 @@ app.get('/upload', (req, res) => { // most recent get upload!!!!!!!!!
        //photoUrls.push(result.row.photo_url)
       } */
       console.log("FGHJKHJGJHJ:" ,photoUrls)
-      res.render('pages/upload', { message: 'success', photoUrls: photoUrls });
+      res.render('pages/upload', { photoUrls: photoUrls });
     })
     .catch((error) => {
       res.render('pages/upload', { message: 'erorr couldnt display photo', photoUrls: [] });
@@ -388,6 +332,7 @@ app.post("/upload", uploader.single("recfile"), async (req, res) => { // this ac
     res.render('pages/upload',{ message: 'no user ' });
   });
 });
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
