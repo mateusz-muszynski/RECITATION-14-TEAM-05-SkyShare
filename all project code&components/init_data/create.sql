@@ -20,7 +20,7 @@ DROP TABLE IF EXISTS photos CASCADE;
 CREATE TABLE IF NOT EXISTS photos (
   photo_id SERIAL PRIMARY KEY NOT NULL,
   photo_state varchar(250), /* valid inputs are Colorado, California, Montana, etc */
- /* photo_description VARCHAR(255), */
+  photo_description VARCHAR(700), 
   photo_url VARCHAR(400),
   user_id INT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(user_id)
