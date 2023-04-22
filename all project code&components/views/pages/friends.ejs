@@ -13,14 +13,6 @@
       <button type="submit">Follow User </button>
     </form>
     <p>Once you follow someone, you'll be able to see all their posts below!</p>
-
-
-    <form action="/unfollow" method="POST">
-      <label for="username">Enter Username:</label>
-      <input type="text" id="usernameU" name="usernameU">
-      <button type="submit">Unfollow User </button>
-    </form>
-
   
     <h2>You are currently following:</h2>
     <% if (followedUsers && followedUsers.length > 0) { %>
