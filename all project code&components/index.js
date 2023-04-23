@@ -299,6 +299,70 @@ app.post('/friends', (req, res) => {
 
 
 
+// API route to unfollow a user!!!!!!!!!!!!!
+app.post('/unfollow', (req, res) => {
+  console.log('jennifer4');
+  const userId = req.session.user.user_id;
+  const username = req.body.usernameU;
+
+  // Look up the user_id of the user trying to be unfollowed
+  const query = 'SELECT user_id FROM users WHERE username = $1';
+  db.query(query, [username])
+    .then(result => {
+      if (!result || result.length === 0 || result[0].user_id.length === 0) {
+        const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+        db.query(query, [userId])
+          .then(result => {
+            const usernames = result.map(row => row.username);
+            res.redirect('/friends') // user tries unfollowing a username that dne in database
+          })
+          .catch(error => {
+            console.error(error);
+            res.status(500).send('Error retrieving followed usernames');
+          });
+        return;
+      }
+
+      const followingId = result[0].user_id;
+      const selectQuery = 'SELECT * FROM followers WHERE user_id = $1 AND following_id = $2';
+      db.query(selectQuery, [userId, followingId])
+        .then(followers => {
+          if (followers.length === 0) { // check if the user is already not following the username. if so, then j redirect to the same page..
+            //res.status(400).send('You are not currently following this user.');
+            res.redirect('/friends') 
+            return;
+          }
+
+          const query = 'SELECT username FROM users JOIN followers ON users.user_id = followers.following_id WHERE followers.user_id = $1';
+          db.query(query, [userId])
+            .then(result => {
+              const deleteQuery = 'DELETE FROM followers WHERE user_id = $1 AND following_id = $2';
+              db.query(deleteQuery, [userId, followingId])
+                .then(result => {
+                  res.redirect('/friends');
+                })
+                .catch(error => {
+                  console.error(error);
+                  res.status(500).send('Error deleting follower from database');
+                });
+            })
+            .catch(error => {
+              console.error(error);
+              res.status(500).send('Error retrieving followed usernames');
+            });
+        })
+        .catch(error => {
+          console.error(error);
+          res.status(500).send('Error checking if user is already following');
+        });
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).send('Error looking up user by username');
+    });
+});
+
+
 
 
 // *************************************************************************     THE `MY PHOTOS` PAGE !!!!!!!!!!!
