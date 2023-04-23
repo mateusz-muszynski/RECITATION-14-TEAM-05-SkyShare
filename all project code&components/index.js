@@ -418,6 +418,19 @@ app.post("/upload", uploader.single("recfile"), async (req, res) => { // bro thi
 });
 
 
+//delete a photo!
+app.post('/delete-photo', (req, res) => {
+  const photoUrl = req.body.photo_url;
+
+  db.none('DELETE FROM photos WHERE photo_url = $1', [photoUrl])
+    .then(() => {
+      res.redirect('/upload');
+    })
+    .catch((error) => {
+      console.error(error);
+      res.redirect('/upload');
+    });
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
