@@ -173,7 +173,61 @@ app.use(auth);
 
 // ii. API route for home
 app.get('/home', (req, res) => {
-  res.render('pages/home.ejs');
+  if (!req.session.user) {
+    res.redirect('/login');
+    return;
+  }
+
+  // Query to get a random followed user's information
+  const randomFollowedUserQuery = `
+    SELECT u.user_id, u.username
+    FROM followers AS f
+    JOIN users AS u ON f.following_id = u.user_id
+    WHERE f.user_id = $1
+    ORDER BY RANDOM()
+    LIMIT 3`;
+  const recentUserImagesQuery = `
+    SELECT photo_url
+    FROM photos
+    WHERE user_id = $1
+    ORDER BY photo_id DESC
+    LIMIT 2` ;
+  const randomFollowedUserImageQuery = `
+    SELECT p.photo_url, p.photo_state, u.username
+    FROM (
+      SELECT user_id, MAX(photo_id) as max_photo_id
+      FROM photos
+      WHERE user_id = ANY($1)
+      GROUP BY user_id
+    ) AS latest
+    JOIN photos AS p ON latest.max_photo_id = p.photo_id
+    JOIN users AS u ON p.user_id = u.user_id`;
+  
+
+
+
+  // Execute the query
+  db.task(async t => {
+    const randomFollowedUsers = await t.any(randomFollowedUserQuery, [req.session.user.user_id]);
+    const recentUserImages = await t.any(recentUserImagesQuery, [req.session.user.user_id]);
+  
+    const followedUserIds = randomFollowedUsers.map(user => user.user_id);
+    const randomFollowedUserImages = await t.any(randomFollowedUserImageQuery, [followedUserIds]);
+  
+    return { randomFollowedUsers, recentUserImages, randomFollowedUserImages };
+  })
+    .then(({ randomFollowedUsers, recentUserImages, randomFollowedUserImages }) => {
+      res.render('pages/home.ejs', {
+        username: req.session.user.username,
+        randomFollowedUsers: randomFollowedUsers,
+        recentUserImages: recentUserImages,
+        randomFollowedUserImages: randomFollowedUserImages,
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).send('Error fetching data');
+    });  
 });
 
 // i. API route for Logout​   
