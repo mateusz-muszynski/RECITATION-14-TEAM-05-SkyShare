@@ -15,17 +15,23 @@ CREATE TABLE IF NOT EXISTS followers (
   FOREIGN KEY (following_id) REFERENCES users(user_id)
 );
 
-
-DROP TABLE IF EXISTS photos CASCADE;
-CREATE TABLE IF NOT EXISTS photos (
-  photo_id SERIAL PRIMARY KEY NOT NULL,
-  photo_state varchar(250), /* valid inputs are Colorado, California, Montana, etc */
-  photo_description VARCHAR(255), 
-  photo_url VARCHAR(400),
-  user_id INT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(user_id)
+DROP TABLE IF EXISTS states CASCADE; 
+CREATE TABLE IF NOT EXISTS states (
+  state_id SERIAL PRIMARY KEY NOT NULL,
+  state_name VARCHAR(200),
+  lng DECIMAL NOT NULL,
+  lat DECIMAL NOT NULL
 );
 
+DROP TABLE IF EXISTS photos CASCADE; 
+CREATE TABLE IF NOT EXISTS photos (
+  photo_id SERIAL PRIMARY KEY NOT NULL,
+  user_id INT NOT NULL,
+  photo_state VARCHAR(250),
+  photo_description VARCHAR(200),
+  photo_url VARCHAR(300) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
 
 /* WE DO NOT NEED THIS TABLE !!!!

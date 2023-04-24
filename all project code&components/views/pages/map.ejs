@@ -1,0 +1,132 @@
+<%- include ('../partials/header') %>
+    <%- include ('../partials/menu') %>
+
+
+        <!DOCTYPE html>
+        <html>
+
+        <head>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+                integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+                crossorigin="anonymous">
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+                crossorigin="anonymous"></script>
+            <style>
+                #map {
+                    height: 900px;
+                    width: 100%;
+                }
+            </style>
+        </head>
+
+        <body>
+
+                            <div id="map"></div>
+
+                            <div id="data" style="display: none;">
+                                <%= JSON.stringify(data) %>
+                            </div>
+
+                            <script
+                                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDBpiSgIoZ-M5pKdO6p5IWqnNoDo0HkfYs&callback=initMap"
+                                async defer></script>
+                            <script>
+                                async function initMap() {
+                                    // 读取从后端传入的数据
+                                    const dataEl = await document.getElementById("data");
+                                    const data = JSON.parse(dataEl.textContent);
+                                    const center = { lat: parseFloat(data.states[0].lat), lng: parseFloat(data.states[0].lng) };
+                                    console.log(center)
+                                    // const myLatLng = { lat: data.lat, lng: data.lng };
+                                    const map = new google.maps.Map(document.getElementById("map"), {
+                                        zoom: 5,
+                                        center: center,
+                                    });
+
+                                    var markers = [];
+
+                                    for (let i = 0; i < data.states.length; i++) {
+                                        markers.push(
+                                            new google.maps.Marker({
+                                                position: { lat: parseFloat(data.states[i].lat), lng: parseFloat(data.states[i].lng) },
+                                                map,
+                                                title: data.states[i].state_name,
+                                            })
+                                        )
+                                    }
+
+
+                                    var infowindows = [];
+                                    for (let i = 0; i < data.states.length; i++) {
+                                        if (data.states[i].photos.length > 0) {
+                                            // 创建新的走马灯content
+                                            
+                                            // console.log(contentString);
+                                            
+                                            
+                                            markers[i].addListener("click", () => {
+                                                var contentString =
+                                                    '<div id="carouselExampleCaptions" class="carousel slide">' +
+                                                    '<div class="carousel-indicators">' +
+                                                    '<button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>';
+                                                // '<button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>' +
+                                                // '<button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>';
+                                                for (let j = 0; j < data.states[i].photos.length - 1; j++) {
+                                                    var k = j + 1;
+                                                    contentString += '<button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="' + k + '" aria-label="Slide' + (k + 1) + '"></button>';
+                                                }
+    
+                                                contentString +=
+                                                    '</div>' +
+                                                    '<div class="carousel-inner">' +
+                                                    '<div class="carousel-item active">' +
+                                                    // 替换image
+                                                    '<img src="' + data.states[i].photos[0].photo_url + '" class="d-block w-100" alt="My Image" style="width: 640px; height: 500px;" />' +
+                                                    '<div class="carousel-caption d-none d-md-block">' +
+                                                    '<h5 style="color: black;"> ' + data.states[i].photos[0].username + ' </h5>' +
+                                                    '<h5 style="color: black;"> ' + data.states[i].photos[0].photo_description + ' </h5>' +
+                                                    '</div>' +
+                                                    '</div>';
+                                                for (let j = 0; j < data.states[i].photos.length - 1; j++) {
+                                                    contentString +=
+                                                        '<div class="carousel-item">' +
+                                                        // 替换image
+                                                        '<img src="' + data.states[i].photos[j + 1].photo_url + '" class="d-block w-100" alt="My Image" style="width: 640px; height: 500px;" />' +
+                                                        '<div class="carousel-caption d-none d-md-block">' +
+                                                        '<h5 style="color: black;"> ' + data.states[i].photos[j + 1].username + ' </h5>' +
+                                                        '<h5 style="color: black;"> ' + data.states[i].photos[j + 1].photo_description + ' </h5>' +
+                                                        '</div>' +
+                                                        '</div>';
+                                                }
+    
+                                                contentString +=
+                                                    '</div>' +
+                                                    '<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">' +
+                                                    '<span class="carousel-control-prev-icon" aria-hidden="true"></span>' +
+                                                    '<span class="visually-hidden">Previous</span>' +
+                                                    '</button>' +
+                                                    '<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">' +
+                                                    '<span class="carousel-control-next-icon" aria-hidden="true"></span>' +
+                                                    '<span class="visually-hidden">Next</span>' +
+                                                    '</button>' +
+                                                    '</div>';
+
+                                                infowindows.forEach(infowindow =>{
+                                                    infowindow.close();
+                                                })
+                                                var infowindow = new google.maps.InfoWindow({
+                                                    content: contentString
+                                                });
+
+                                                infowindows.push(infowindow);
+                                                infowindow.open(map, markers[i]);
+                                            });
+
+                                        }
+                                    }
+                                }
+                            </script>
+        </body>
+
+        </html>

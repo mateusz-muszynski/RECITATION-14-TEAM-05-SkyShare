@@ -68,8 +68,8 @@ app.use(
 
 // TODO - Include your API routes here
 app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'}); // this api was just added as a sample positive test case thing for lab 11
-  });
+  res.json({ status: 'success', message: 'Welcome!' }); // this api was just added as a sample positive test case thing for lab 11
+});
 
 // "Let's add our first route"
 app.get('/', (req, res) => {
@@ -79,7 +79,7 @@ app.get('/', (req, res) => {
 
 // API Route for Register​
 app.get('/register', (req, res) => {
-  res.render('pages/register.ejs');   
+  res.render('pages/register.ejs');
 });
 
 
@@ -129,10 +129,10 @@ app.post('/login', async (req, res) => {
 
     if (user.length === 0) {
       res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
-    // res.redirect('/register');
+      // res.redirect('/register');
       return;
     }
-    
+
     const match = await bcrypt.compare(password, user[0].password);
 
     if (!match) {
@@ -151,20 +151,20 @@ app.post('/login', async (req, res) => {
     console.log('SAVEDUSERID' + req.session.user.user_id);
 
     res.redirect('/home');
-    
+
   } catch (err) {
     console.log(err);
-    res.render('pages/login',{ message: 'database request fail' });
+    res.render('pages/login', { message: 'database request fail' });
   }
 });
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
-if (!req.session.user) {
-  // Default to login page.
-  return res.redirect('/login');
-}
-next();
+  if (!req.session.user) {
+    // Default to login page.
+    return res.redirect('/login');
+  }
+  next();
 };
 
 // Authentication Required
@@ -178,8 +178,8 @@ app.get('/home', (req, res) => {
 
 // i. API route for Logout​   
 app.get("/logout", (req, res) => {
-req.session.destroy();
-res.render('pages/login', { message: 'Logged out Successfully' });
+  req.session.destroy();
+  res.render('pages/login', { message: 'Logged out Successfully' });
 });
 
 
@@ -237,7 +237,7 @@ app.post('/friends', (req, res) => {
         db.query(query, [userId])
           .then(result => {
             const usernames = result.map(row => row.username);
-             res.redirect('/friends') // user tries following a username that dne in database
+            res.redirect('/friends') // user tries following a username that dne in database
           })
           .catch(error => {
             console.error(error);
@@ -273,7 +273,7 @@ app.post('/friends', (req, res) => {
               db.query(query, [userId])
                 .then(followedUsers => {
                   const usernames = followedUsers.map(row => row.username);
-                 res.redirect('/friends'); // success.. ur now following them
+                  res.redirect('/friends'); // success.. ur now following them
                 })
                 .catch(error => {
                   console.error(error);
@@ -329,7 +329,7 @@ app.post('/unfollow', (req, res) => {
         .then(followers => {
           if (followers.length === 0) { // check if the user is already not following the username. if so, then j redirect to the same page..
             //res.status(400).send('You are not currently following this user.');
-            res.redirect('/friends') 
+            res.redirect('/friends')
             return;
           }
 
@@ -362,7 +362,44 @@ app.post('/unfollow', (req, res) => {
     });
 });
 
+// map related routes start here
+app.get('/map', async (req, res) => {
+  // TO-DO
+  // 查所有的state
+  // then 根据每个state_id查对应state下所有的photos
+  const selectquery = `SELECT state_id, state_name, lat, lng FROM states;`
 
+  const selectphotoquery = `SELECT users.username, photos.photo_description, photos.photo_url FROM photos FULL JOIN users ON photos.user_id = users.user_id WHERE photos.photo_state = $1;`
+
+  await db.query(selectquery)
+    .then(async states => {
+      console.log(states)
+      for (let i = 0; i < states.length; i++) {
+        var state_name = states[i].state_name;
+        
+        await db.query(selectphotoquery, [state_name])
+          .then(photos => {
+            states[i]['photos'] = photos;
+          })
+      }
+      var data = {
+        states: states,
+      }
+      console.log(data.states[44].photos[0]);
+      res.render('pages/map', {
+        data: data
+      });
+    });
+
+    
+
+  // 前端需要location的信息 生成marker
+});
+
+app.get('/maps', async (req, res) => {
+  res.render('pages/maps', {
+  });
+})
 
 
 // *************************************************************************     THE `MY PHOTOS` PAGE !!!!!!!!!!!
@@ -371,7 +408,7 @@ app.post('/unfollow', (req, res) => {
 
 
 /* API route for uploadphoto. this gets the photo_url(s) associated w the user in session, and then in the ejs, it uses forEach to display them all */
-app.get('/upload', (req, res) => { 
+app.get('/upload', (req, res) => {
   //db.any('SELECT photo_url FROM photos WHERE user_id = $1', [req.session.user.user_id]) // this is if we just get the photourl and not the location
   db.any('SELECT photo_url, photo_state FROM photos WHERE user_id = $1', [req.session.user.user_id]) // get photo_state as well so we can display it on page
     .then((result) => {
@@ -379,14 +416,14 @@ app.get('/upload', (req, res) => {
       //const photoUrls = result;  // this is if we just get the photourl and not the location
       const photoUrls = result.map(row => ({ photo_url: row.photo_url, photo_state: row.photo_state })); // getting photo_state as well
 
-      console.log("FGHJKHJGJHJ:" ,photoUrls)
+      console.log("FGHJKHJGJHJ:", photoUrls)
       res.render('pages/upload', { photoUrls: photoUrls });
     })
     .catch((error) => {
       res.render('pages/upload', { message: 'erorr couldnt display photo', photoUrls: [] });
     });
-}); 
-  
+});
+
 
 //API route 
 // given user input of a photo file, this generates a url for that file and stores it in the photos table
@@ -399,22 +436,22 @@ app.post("/upload", uploader.single("recfile"), async (req, res) => { // bro thi
   const userId = req.session.user.user_id;
   const state = req.body.state; // Retrieve the selected state from the request body
   db.query('select * from users where user_id = $1', [userId])
-  .then(() => {
+    .then(() => {
       // once u successfully get userid, insert the data into photos table
-      db.query('INSERT INTO photos (photo_url, photo_state, user_id) VALUES ($1, $2, $3)', [upload.secure_url, state, userId]) // insert location into the photos table
-      .then(() => {
-        // res.render('pages/upload',{ message: 'success', photoUrls: []});
-        res.redirect('/upload');
-      })
-      .catch((error) => {
-        // If the insert fails, redirect to GET /register route
-        res.render('pages/upload',{ message: 'not success', photoUrls: []});
-      });
-  })
-  .catch((error) => {
-    // If it failed
-    res.render('pages/upload',{ message: 'no user ' });
-  });
+      db.query('INSERT INTO photos (photo_url, photo_state, user_id) VALUES ($1, $2, $3)', [upload.secure_url, state, userId, state]) // insert location into the photos table
+        .then(() => {
+          // res.render('pages/upload',{ message: 'success', photoUrls: []});
+          res.redirect('/upload');
+        })
+        .catch((error) => {
+          // If the insert fails, redirect to GET /register route
+          res.render('pages/upload', { message: 'not success', photoUrls: [] });
+        });
+    })
+    .catch((error) => {
+      // If it failed
+      res.render('pages/upload', { message: 'no user ' });
+    });
 });
 
 
