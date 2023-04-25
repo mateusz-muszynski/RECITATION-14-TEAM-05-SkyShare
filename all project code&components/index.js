@@ -362,6 +362,7 @@ app.post('/unfollow', (req, res) => {
     });
 });
 
+
 // map related routes start here
 app.get('/map', async (req, res) => {
   // TO-DO
@@ -396,10 +397,7 @@ app.get('/map', async (req, res) => {
   // 前端需要location的信息 生成marker
 });
 
-app.get('/maps', async (req, res) => {
-  res.render('pages/maps', {
-  });
-})
+
 
 
 // *************************************************************************     THE `MY PHOTOS` PAGE !!!!!!!!!!!
@@ -455,6 +453,19 @@ app.post("/upload", uploader.single("recfile"), async (req, res) => { // bro thi
 });
 
 
+//delete a photo!
+app.post('/delete-photo', (req, res) => {
+  const photoUrl = req.body.photo_url;
+
+  db.none('DELETE FROM photos WHERE photo_url = $1', [photoUrl])
+    .then(() => {
+      res.redirect('/upload');
+    })
+    .catch((error) => {
+      console.error(error);
+      res.redirect('/upload');
+    });
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
