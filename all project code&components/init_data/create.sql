@@ -25,3 +25,16 @@ CREATE TABLE IF NOT EXISTS photos (
   image_url VARCHAR(300) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+DROP TABLE IF EXISTS nasa CASCADE;
+CREATE TABLE IF NOT EXISTS nasa(
+    nasa_id SERIAL PRIMARY KEY NOT NULL,
+    copyright VARCHAR(100) NOT NULL,
+    date_n VARCHAR(100) NOT NULL,
+    explanation VARCHAR(100) NOT NULL,
+    hdurl VARCHAR(100) NOT NULL,
+    media_type VARCHAR(100) NOT NULL,
+    service_version VARCHAR(100) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    url_n VARCHAR(100) NOT NULL
+);

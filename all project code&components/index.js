@@ -312,8 +312,79 @@ db.query(query, [username])
   .catch(error => {
     console.error(error);
     res.status(500).send('Error looking up user');
-  });
+  });   
 });
+
+app.get('/nasa', async (req, res) => {
+  //res.render('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z');
+  
+
+  axios({
+    url: `localhost:3000/v1/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z&date=2014-10-01&concept_tags=True`,
+    method: 'GET',
+    dataType: 'json',
+    headers: {
+      'Accept-Encoding': 'application/json',
+    },
+    params: {
+      apikey: process.env.r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z,
+      keyword: 'resource', //you can choose any artist/event here
+      size: 1,
+    },
+    resource: {
+      image_set: "apod"
+    },
+  })
+//okay so you need to take this informations and make a new const query to add the data into and then assign it like a regular
+//get function and then create the nasa table make a json object blah blah actally create the json object first and then use the const query to put the crap
+//in there using the names you set when you gathered the info cool? cool. the json object should be named data i think i dont actually know but that might be correct 
+    
+    .then(results => {
+
+      console.log(results.resource); // the results will be displayed on the terminal if the docker containers are running // Send some parameters
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).send('error gathering nasa data');
+    });
+
+}); 
+
+app.get('/nasa', async (req,res) =>{
+  res.render('pages/nasa', {
+  });
+})
+//<h1 name="title" value="<%-nasa.title%>"><%= nasa.title %></h1>
+
+/*app.put('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z', function(req,res) {
+  var query = 'update nasa set copyright =$1, date_n=$2, explanation=$3, hdurl=$4, media_type=$5, service_version=$6, title=$7, url_n=$8 where nasa_id = 1 returning *;';
+
+  db.task('put-everything', task=> {
+    return task.any(query, [
+      req.body.copyright,
+      req.body.date,
+      req.body.explanation,
+      req.body.hdurl,
+      req.body.media_type,
+      req.body.service_version,
+      req.body.title,
+      req.body.url,
+    ]);
+  })
+
+  .then(data=> {
+    res.status(201).json({
+      status: 'success',
+      query: data,
+      massage: 'data added successfully',
+    });
+  })
+  .catch(function(err) {
+    return console.log(err);
+  });
+})
+
+*/
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
