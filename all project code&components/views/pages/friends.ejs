@@ -6,45 +6,63 @@
     <div class="col">
       <%- include('../partials/message', locals) %>
     </div>
-    
-      
 
-      <form action="/friends" method="POST">
-      <!-- <label for="username">Enter Username:</label> -->
-        <input type="text" id="username" name="username" placeholder="Enter Username" style="margin-left:1px; margin-top:20px;">
-        <button type="submit">Follow User </button>
-        <p> </p>
-      </form>
+    <div class="row">
+      <div class="col-md-6">
+        <form action="/friends" method="POST">
+          <div class="input-group">
+            <input type="text" id="username" name="username" class="form-control" placeholder="Enter Username">
+            <button type="submit" class="btn btn-primary" style="background-color:rgb(87, 107, 166); ">Follow User</button>
+          </div>
+        </form>
+      </div>
 
+      <div class="col-md-6">
+        <form action="/unfollow" method="POST">
+          <div class="input-group">
+            <input type="text" id="usernameU" name="usernameU" class="form-control" placeholder="Enter Username">
+            <button type="submit" class="btn btn-danger" style="background-color:rgb(84, 61, 104); border-color:rgb(84, 61, 104);">Unfollow User</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-      <form action="/unfollow" method="POST">
-      <!-- <label for="username">Enter Username:</label> -->
-        <input type="text" id="usernameU" name="usernameU" placeholder="Enter Username" style="margin-left:1px; margin-top:.5px;">
-        <button type="submit">Unfollow User </button>
-      </form>
-
-  
-   <!-- <h2>You are currently following:</h2> -->
+    <p></p>
     <% if (followedUsers && followedUsers.length > 0) { %>
-      <ul>
-        <% followedUsers.forEach(followedUser => { %>
-          <li><%= followedUser.username %>'s posts</li>
-          <ul>
-            <% followedUser.photoUrls.forEach(photoUrl => { %>
-              <li><%= followedUser.username %> took this in <%= photoUrl.photo_state %>! <img src="<%= photoUrl.photo_url %>"></li>
-            <% }); %>
-          </ul>
-        <% }); %>
-      </ul>
+      <% followedUsers.forEach(followedUser => { %>
+        <div class="card mb-3 border-0" style="background-color: white;">
+          <div class="card-header" style="background-color: white;">
+            <%= followedUser.username %>'s posts!
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <% followedUser.photoUrls.forEach(photoUrl => { %>
+                <div class="col-sm-4">
+                  <div class="card mb-3 border-0">
+                    <img class="card-img-top" src="<%= photoUrl.photo_url %>" alt="<%= photoUrl.photo_state %>">
+                    <div class="card-body">
+                      <p class="text-muted">Taken in <%= photoUrl.photo_state %></p>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    
     <% } else { %>
       <div class="notFollowing">
         <p>You are not currently following anyone.</p>
         <p>Once you follow someone, their photos will show up here!</p>
       </div>
     <% } %>
-
+    
+    
   </div>
 </main>
+
+
 <style>
   img {
     max-width: 300px;
