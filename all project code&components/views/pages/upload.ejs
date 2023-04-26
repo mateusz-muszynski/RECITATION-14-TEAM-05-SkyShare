@@ -10,7 +10,9 @@
 
 
       <form action="/upload" method="POST" enctype="multipart/form-data">
-        <h3>Upload Photo</h3>
+        <div class="UPload">
+          <h3>Upload Photo &#x2728;</h3>
+        </div>
         <input type="file" name="recfile" accept="image/*" required>
         <br>
 
@@ -69,9 +71,9 @@
           <option value="Wyoming">Wyoming</option>
         </select>        <br>
         
-        <input type="submit" value="Upload">
+        <input type="submit" value="Upload" style="background-color:rgb(87, 107, 166); color:white; border:none; border-radius:2px; width: 70px;">
       </form>
-      
+      <p></p>
       <% if (photoUrls.length > 0) { %>
         <h4>Your images!</h4>
         <% for (let i = 0; i < photoUrls.length; i += 3) { %>
@@ -79,7 +81,7 @@
             <% for (let j = i; j < i + 3 && j < photoUrls.length; j++) { %>
               <div class="col-md-4">
                 <img src="<%= photoUrls[j].photo_url %>" alt="User uploaded photo">
-                <p>You took this in <%= photoUrls[j].photo_state %>!</p>
+                <p>You took this in <%= photoUrls[j].photo_state %></p>
                 <form method="POST" action="/delete-photo">
                   <input type="hidden" name="photo_url" value="<%= photoUrls[i].photo_url %>">
                   <button type="submit" name="delete">Delete</button>
@@ -89,7 +91,9 @@
           </div>
         <% } %>
       <% } else { %>
-        <p>You have no photos uploaded yet!</p>
+        <div class="notFollowing">
+        <p>You have not posted any photos yet!</p>
+        </div>
       <% } %>
     
   
@@ -100,6 +104,27 @@
       max-width: 300px;
       max-height: 300px;
     }
+    button {
+      background-color:rgb(95, 84, 183);
+      color: white;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+    button:hover{
+      background-color:rgb(146, 194, 238);
+      transition: .2s;
+    }
+    .notFollowing{
+    margin-top:9px;
+    font-style:italic;
+    opacity: .5;
+  }
+  .UPload{
+   /* font-family: 'Times New Roman', Times, serif; */
+    color:rgb(71, 70, 70);
+  }
   </style>
+  
   
   <%- include ('../partials/footer') %>
