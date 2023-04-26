@@ -88,7 +88,7 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
   // Check if username or password is empty
   if (!req.body.username || !req.body.password) {
-    res.render('pages/register', { message: 'Username and password are required.' });
+    res.render('pages/register', { message: 'Username and password are required!' });
     return;
   }
   // we dont check if user tries registering with an already existing username lol...
@@ -103,7 +103,8 @@ app.post('/register', async (req, res) => {
     })
     .catch((error) => {
       // If the insert fails, redirect to GET /register route
-      res.redirect('/register');
+      console.log('JENNIFERRRR');
+      res.render('pages/register', { message: 'Username already exists!' });
     });
 });
 
