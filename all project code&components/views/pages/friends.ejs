@@ -7,26 +7,28 @@
       <%- include('../partials/message', locals) %>
     </div>
     
-    <form action="/friends" method="POST">
-      <label for="username">Enter Username:</label>
-      <input type="text" id="username" name="username">
-      <button type="submit">Follow User </button>
-    </form>
-    <p>Once you follow someone, you'll be able to see all their posts below!</p>
+      
+
+      <form action="/friends" method="POST">
+      <!-- <label for="username">Enter Username:</label> -->
+        <input type="text" id="username" name="username" placeholder="Enter Username" style="margin-left:1px; margin-top:20px;">
+        <button type="submit">Follow User </button>
+        <p> </p>
+      </form>
 
 
-    <form action="/unfollow" method="POST">
-      <label for="username">Enter Username:</label>
-      <input type="text" id="usernameU" name="usernameU">
-      <button type="submit">Unfollow User </button>
-    </form>
+      <form action="/unfollow" method="POST">
+      <!-- <label for="username">Enter Username:</label> -->
+        <input type="text" id="usernameU" name="usernameU" placeholder="Enter Username" style="margin-left:1px; margin-top:.5px;">
+        <button type="submit">Unfollow User </button>
+      </form>
 
   
-    <h2>You are currently following:</h2>
+   <!-- <h2>You are currently following:</h2> -->
     <% if (followedUsers && followedUsers.length > 0) { %>
       <ul>
         <% followedUsers.forEach(followedUser => { %>
-          <li><%= followedUser.username %></li>
+          <li><%= followedUser.username %>'s posts</li>
           <ul>
             <% followedUser.photoUrls.forEach(photoUrl => { %>
               <li><%= followedUser.username %> took this in <%= photoUrl.photo_state %>! <img src="<%= photoUrl.photo_url %>"></li>
@@ -35,7 +37,10 @@
         <% }); %>
       </ul>
     <% } else { %>
-      <p>You are not currently following anyone.</p>
+      <div class="notFollowing">
+        <p>You are not currently following anyone.</p>
+        <p>Once you follow someone, their photos will show up here!</p>
+      </div>
     <% } %>
 
   </div>
@@ -45,5 +50,28 @@
     max-width: 300px;
     max-height: 300px;
   }
+  button {
+    background-color:rgb(48, 36, 140);
+    color: white;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  button:hover{
+    background-color:rgb(146, 194, 238);
+    transition: .2s;
+  }
+
+  .introWords{
+    font-style:italic;
+    font-size: 15px;
+  }
+  .notFollowing{
+    margin-top:9px;
+    font-style:italic;
+    opacity: .5;
+  }
+
+
 </style>
 <%- include ('../partials/footer') %>
