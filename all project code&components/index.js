@@ -317,36 +317,51 @@ db.query(query, [username])
 
 app.get('/nasa', async (req, res) => {
   //res.render('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z');
+  const results = {};
+
+  axios.get('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z')
+    .then(response =>{
+      const responseData = response.data;
+        results[responseData.id] ={
+          date: responseData.date,
+          title: responseData.title,
+          url: responseData.url,
+          explanation: responseData.explanation
+        };
+      console.log(results);
+      
+      res.render('pages/nasa');
+    })
+    .catch(error=>{
+      console.error(error);
+      res.status(500).send('error gathering nasa data');
+    });
   
+  /*
 
   axios({
-    url: `localhost:3000/v1/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z&date=2014-10-01&concept_tags=True`,
+    url: `https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z`,
     method: 'GET',
     dataType: 'json',
     headers: {
       'Accept-Encoding': 'application/json',
     },
     params: {
-      apikey: process.env.r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z,
-      keyword: 'resource', //you can choose any artist/event here
+      apikey: r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z,
+      keyword: "date", //you can choose any artist/event here
       size: 1,
     },
-    resource: {
-      image_set: "apod"
-    },
   })
-//okay so you need to take this informations and make a new const query to add the data into and then assign it like a regular
-//get function and then create the nasa table make a json object blah blah actally create the json object first and then use the const query to put the crap
-//in there using the names you set when you gathered the info cool? cool. the json object should be named data i think i dont actually know but that might be correct 
-    
+  
     .then(results => {
 
-      console.log(results.resource); // the results will be displayed on the terminal if the docker containers are running // Send some parameters
+      console.log(results.data.nasa.date); // the results will be displayed on the terminal if the docker containers are running // Send some parameters
     })
     .catch(error => {
       console.error(error);
       res.status(500).send('error gathering nasa data');
     });
+    */
 
 }); 
 
@@ -394,3 +409,7 @@ console.log('Server is listening on port 3000');
 
 
 
+//okay so you need to take this informations and make a new const query to add the data into and then assign it like a regular
+//get function and then create the nasa table make a json object blah blah actally create the json object first and then use the const query to put the crap
+//in there using the names you set when you gathered the info cool? cool. the json object should be named data i think i dont actually know but that might be correct 
+  
