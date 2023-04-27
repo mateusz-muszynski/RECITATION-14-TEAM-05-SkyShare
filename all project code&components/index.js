@@ -523,6 +523,38 @@ app.post('/delete-photo', (req, res) => {
     });
 });
 
+//nasa related API's start here
+
+app.get('/nasa', async (req, res) => {
+  //res.render('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z');
+  const results = {};
+
+  axios.get('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z')
+    .then(response =>{
+      const responseData = response.data;
+        results[responseData.id] ={
+          date: responseData.date,
+          title: responseData.title,
+          url: responseData.url,
+          explanation: responseData.explanation
+        };
+      console.log(results);
+      
+      res.render('pages/nasa');
+    })
+    .catch(error=>{
+      console.error(error);
+      res.status(500).send('error gathering nasa data');
+    });
+
+}); 
+
+//render nasa page
+app.get('/nasa', async (req,res) =>{
+  res.render('pages/nasa', {
+  });
+})
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************

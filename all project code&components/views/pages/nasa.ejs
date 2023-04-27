@@ -1,0 +1,22 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+
+<main>
+    <div class="container">
+      <div class="col"> <%- include('../partials/message', locals) %> </div>
+
+      <h1 style="margin-top: 100px;"><centre>NASA APOD</centre></h1>
+
+      <p>${results.responseData.title}</p>
+
+      </div>
+      
+      
+      
+
+    </div>
+</main>
+
+  
+<%- include ('../partials/footer') %>
