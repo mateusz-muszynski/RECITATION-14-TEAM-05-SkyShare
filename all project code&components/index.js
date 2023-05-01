@@ -540,8 +540,25 @@ app.get('/nasa', async (req, res) => {
           explanation: responseData.explanation
         };
       console.log(results);
-      
-      res.render('pages/nasa');
+      var date = responseData.date;
+      var title = responseData.title;
+      var url = responseData.url;
+      var explanation = responseData.explanation;
+      var current = 'default';
+ 
+ 
+      var query = 'update nasa set hdate = $1, title = $2, hdurl = $3, explanation = $4 where current_space = $5 returning *;';
+ 
+ 
+      db.any(query, [
+        date,
+        title,
+        url,
+        explanation,
+        current
+      ])
+     
+      res.render('pages/nasa', {responseData});
     })
     .catch(error=>{
       console.error(error);

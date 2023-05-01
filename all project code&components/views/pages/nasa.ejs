@@ -6,7 +6,12 @@
     <div class="container">
       <div class="col"> <%- include('../partials/message', locals) %> </div>
 
-      <h1 style="margin-top: 100px;"><centre>NASA APOD</centre></h1>
+      <h1 style="margin-top: 30px;"><centre>NASA Astronomy Picture of the Day</centre></h1>
+     <br>
+     <h2><%-responseData.title%></h2>
+     <p><%-responseData.date%></p>
+     <img src="<%-responseData.url%>" alt="image not found">
+     <p><%-responseData.explanation%></p>
 
       </div>
       
