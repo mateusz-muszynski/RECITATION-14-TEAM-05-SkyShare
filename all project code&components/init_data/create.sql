@@ -36,10 +36,11 @@ CREATE TABLE IF NOT EXISTS photos (
 DROP TABLE IF EXISTS nasa CASCADE;
 CREATE TABLE IF NOT EXISTS nasa(
     nasa_id SERIAL PRIMARY KEY NOT NULL,
-    hdate VARCHAR(100) NOT NULL,
+    current_space VARCHAR(100) NOT NULL,
+    hdate VARCHAR(300) NOT NULL,
     title VARCHAR(100) NOT NULL,
     hdurl VARCHAR(100) NOT NULL,
-    explanation VARCHAR(100) NOT NULL
+    explanation TEXT NOT NULL
 );
 
 

@@ -529,6 +529,7 @@ app.get('/nasa', async (req, res) => {
   //res.render('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z');
   const results = {};
 
+
   axios.get('https://api.nasa.gov/planetary/apod?api_key=r6ZWlU2Jp8qOOLeqsbl6EYaI4NV64x4AcTzUtt6z')
     .then(response =>{
       const responseData = response.data;
@@ -539,8 +540,25 @@ app.get('/nasa', async (req, res) => {
           explanation: responseData.explanation
         };
       console.log(results);
+
+      var date = responseData.date;
+      var title = responseData.title;
+      var url = responseData.url;
+      var explanation = responseData.explanation;
+      var current = 'default';
+
+      var query = 'update nasa set hdate = $1, title = $2, hdurl = $3, explanation = $4 where current_space = $5 returning *;';
+
+      db.any(query, [
+        date,
+        title,
+        url,
+        explanation,
+        current
+      ])
       
-      res.render('pages/nasa');
+      res.render('pages/nasa', {responseData});
+      
     })
     .catch(error=>{
       console.error(error);
@@ -554,6 +572,8 @@ app.get('/nasa', async (req,res) =>{
   res.render('pages/nasa', {
   });
 })
+
+
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
@@ -572,8 +592,36 @@ console.log('Server is listening on port 3000');
 
 
 
+/*
+const container = document.createElement('div');
 
+      for(const [key, value] of Object.entries(results)) {
+        const objectWrapper = document.createElement('div');
+        
+        const idHeading = document.createElement('h2');
+        idHeading.textContent = 'Object ${key}';
+        objectWrapper.appendChild(idHeading);
 
+        const nameParagraph = document.createElement('p');
+        titleParagraph.textContent = 'Title: ${value.title}';
+        objectWrapper.appendChild(titleParagraph);
+
+        const dateParagraph = document.createElement('p');
+        dateParagraph.textContent = 'Date: ${value.date}';
+        objectWrapper.appendChild(dateParagraph);
+
+        const urlElement = document.createElement('img');
+        urlElement.src = value.url;
+        objectWrapper.appendChild(urlElement);
+
+        const explanationParagraph = document.createElement('p');
+        explanationParagraph.textContent = 'Explanation: ${value.explanation}';
+        objectWrapper.appendChild(explanationParagraph);
+
+        container.appendChild(container);
+      }
+      document.body.appendChild(container);
+*/
 /*
 app.get('/friends', (req, res) => {
   res.render('pages/friends');

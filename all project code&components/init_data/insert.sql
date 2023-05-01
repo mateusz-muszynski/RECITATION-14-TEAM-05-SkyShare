@@ -49,4 +49,5 @@ insert into states(state_name, lat, lng) Values('Wyoming', 	43.075970,	-107.2902
 insert into states(state_name, lat, lng) Values('North Carolina', 	35.782169,	-80.793457);
 insert into states(state_name, lat, lng) Values('Louisiana', 	30.391830,	-92.329102);
 
+insert into nasa(current_space,hdate,title,hdurl,explanation) Values('default','default','default','default','default');
 
