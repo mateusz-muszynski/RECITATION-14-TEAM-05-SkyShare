@@ -88,7 +88,8 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
   // Check if username or password is empty
   if (!req.body.username || !req.body.password) {
-    res.render('pages/register', { message: 'Username and password are required!' });
+    res.redirect('/register');
+   // res.render('pages/register', { message: 'Username and password are required!' });
     return;
   }
   // we dont check if user tries registering with an already existing username lol...
@@ -129,8 +130,8 @@ app.post('/login', async (req, res) => {
     const user = await db.query('SELECT * FROM users WHERE username = $1', [username]);
 
     if (user.length === 0) {
-      res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
-      // res.redirect('/register');
+     // res.render('pages/register', { message: 'Username does not exist, redirecting back to register page.' });
+       res.redirect('/register');
       return;
     }
 

@@ -1,4 +1,7 @@
 /* empty for now */
+INSERT INTO users (username, password) VALUES ('hey', '$2b$10$4uR6kATzuF5J0u/ctkwmW.z622k//E4lF7RNc7c5FHMAx9ESp1Fxe');
+insert into users (username, password) values ('hey1', '$2b$10$lVS6KEIIiwMoFIeT.pfknuXJkhoD1Zzvo8aKouw4Tz5z1n4SuMHuO');
+
 insert into states(state_name, lat, lng) Values('West Virginia', 	39.000010,	-80.500001);
 insert into states(state_name, lat, lng) Values('Vermont', 	44.000010,	-72.699997);
 insert into states(state_name, lat, lng) Values('Texas', 	31.000010,	-100.000010);
