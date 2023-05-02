@@ -44,6 +44,6 @@ Below was the link from Lab 13, but the VM has since been deleted as instructed 
 http://recitation-014-team-05.eastus.cloudapp.azure.com:3000/login 
 
 Here is a screenshot of the deployed website from lab 13:
-![alt text](RECITATION-14-TEAM-05-SkyShare/milestoneSubmissions/lab13screenshot.png
+![alt text](milestoneSubmissions/lab13screenshot.png
  "deployed screenshot")
 
