@@ -26,7 +26,7 @@ NodeJs, Cloudinary external API, NASA Photo of the Day external API, Google Maps
 
 ## Prerequisites to run the application - Any software that needs to be installed to run the application:
 ----
-Docker?
+Must install docker to run the application, as our website is hosted in a docker container.
 
 
 ## Instructions on how to run the application locally:
@@ -40,6 +40,10 @@ The automated test cases automaically run once executing docker compose up in th
 
 ## Link to the deployed application:
 ------
+Below was the link from Lab 13, but the VM has since been deleted as instructed by the Lab 13 writeup.
+http://recitation-014-team-05.eastus.cloudapp.azure.com:3000/login 
 
-
+Here is a screenshot of the deployed website from lab 13:
+![alt text](RECITATION-14-TEAM-05-SkyShare/milestoneSubmissions/lab13screenshot.png
+ "deployed screenshot")
 
