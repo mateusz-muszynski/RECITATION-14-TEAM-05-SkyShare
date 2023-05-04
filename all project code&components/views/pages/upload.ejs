@@ -83,11 +83,11 @@
                 <img src="<%= photoUrls[j].photo_url %>" alt="User uploaded photo">
                 <p>You took this in <%= photoUrls[j].photo_state %></p>
                 <form method="POST" action="/delete-photo">
-                  <input type="hidden" name="photo_url" value="<%= photoUrls[i].photo_url %>">
+                  <input type="hidden" name="photo_url" value="<%= photoUrls[j].photo_url %>">
                   <button type="submit" name="delete">Delete</button>
                 </form>
               </div>
-            <% } %>
+            <% } %>            
           </div>
         <% } %>
       <% } else { %>
